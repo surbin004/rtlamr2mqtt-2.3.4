@@ -1,20 +1,6 @@
 ### RTLAMR2MQTT
 
-![Docker Pulls](https://img.shields.io/docker/pulls/allangood/rtlamr2mqtt)
-[![GitHub license](https://img.shields.io/github/license/allangood/rtlamr2mqtt)](https://github.com/allangood/rtlamr2mqtt/blob/main/LICENSE)
-[![GitHub stars](https://img.shields.io/github/stars/allangood/rtlamr2mqtt)](https://github.com/allangood/rtlamr2mqtt/stargazers)
-![GitHub contributors](https://img.shields.io/github/contributors/allangood/rtlamr2mqtt)
-[![GitHub issues](https://img.shields.io/github/issues/allangood/rtlamr2mqtt)](https://github.com/allangood/rtlamr2mqtt/issues)
 
-[![Open your Home Assistant instance and show the add add-on repository dialog with a specific repository URL pre-filled.](https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2Fallangood%2Frtlamr2mqtt)
-
-### Platforms:
-
-[![AMD64](https://img.shields.io/badge/AMD64-Yes-greenb)](https://img.shields.io/badge/AMD64-Yes-greenb)
-[![i386](https://img.shields.io/badge/i386-Yes-greenb)](https://img.shields.io/badge/i386-Yes-greenb)
-[![AARCH64](https://img.shields.io/badge/AARCH64-Yes-greenb)](https://img.shields.io/badge/AARCH64-Yes-greenb)
-[![ARMv7](https://img.shields.io/badge/ARMv7-Yes-greenb)](https://img.shields.io/badge/ARMv7-Yes-greenb)
-[![ARMhf](https://img.shields.io/badge/ARMhf-Yes-greenb)](https://img.shields.io/badge/ARMhf-Yes-greenb)
 
 RTLAMR2MQTT is a small Python program to read your utility meter such as water, gas and energy using an inexpensive USB RTL-SDR device and send these readings to a MQTT broker to be integrated with Home Assistant or NodeRed.
 
@@ -33,72 +19,7 @@ The project is currently under heavy development!
 - Run as an Addon for Home Assistant with Supervisor support and MQTT auto configuration
 - Full sensor customization: `name`, `state_class`, `device_class`, `icon` and `unit_of_measurement`
 
-### Planned features
 
-- Better "LISTEN_ONLY" mode (release 2.2.0)
-
-### Noteworthy Updates
-
-### 2022-05-17
-
-- Bug fixes for remote rtl_tcp and usb_reset logic #123
-- Code changes to load config file and merge defaults
-- Added vscode files to test the Addon development (finally!)
-
-### 2022-04-12
-
-- **REMOVED PARAMETER** usb_reset
-- **ADDED PARAMETER** device_id
-- **DEPRECATED** Anomaly detection (looks like no one is using it and it's not very reliable)
-- **Changed Dockerfile**: Much smaller docker container
-
-### 2022-04-12
-
-- New `tls_enabled` parameter to avoid confusions
-- Some fixes for the Add-On regarding the TLS configuration
-
-### 2022-04-04
-
-- New TLS parameters to MQTT connection
-- New parameter: USB_RESET to address problem mentioned on #98
-
-# Readme starts here
-
-### What do I need?
-
-**1) You need a smart meter**
-First and most important, you must have a "smart" water/gas/energy meter. You can find a list of compatible meters [here](https://github.com/bemasher/rtlamr/blob/master/meters.csv)
-
-**2) You need an USB RTL-SDR device**
-I am using this one: [NooElec NESDR Mini USB](https://www.amazon.ca/NooElec-NESDR-Mini-Compatible-Packages/dp/B009U7WZCA/ref=sr_1_1_sspa?crid=JGS4RV7RXGQQ&keywords=rtl-sdr)
-
-**3) You need a MQTT broker** (Like [Mosquitto](https://mosquitto.org/) )
-
-**4) [Home Assistant](https://www.home-assistant.io/)** is optional, but highly recommended, because it is awesome!
-
-### How it looks like?
-
-![image](https://user-images.githubusercontent.com/757086/117556120-207bd200-b02b-11eb-9149-58eaf9c6c4ea.png)
-
-![image](https://user-images.githubusercontent.com/757086/169098091-bdd93660-daf5-4c8a-bde1-c4b66e7bdb87.png)
-
-### How to run and configure?
-
-#### Home Assistant Add-On:
-
-[![Open your Home Assistant instance and show the add add-on repository dialog with a specific repository URL pre-filled.](https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2Fallangood%2Frtlamr2mqtt)
-
-[![Open your Home Assistant instance and show the dashboard of a Supervisor add-on.](https://my.home-assistant.io/badges/supervisor_addon.svg)](https://my.home-assistant.io/redirect/supervisor_addon/?repository_url=https%3A%2F%2Fgithub.com%2Fallangood%2Frtlamr2mqtt&addon=6713e36e_rtlamr2mqtt)
-
-Manually:
-
-- Navigate to your Add-Ons (Configuration > Add-ons, Backups, & Supervisor)
-- Click the Add-On Store button
-- Navigate to Repositories (3 dots in the top-right corner > Repositories)
-- Add this repository (https://github.com/allangood/rtlamr2mqtt) and click 'Add'
-- You should now see the 'rtlamr' Add-On at the bottom of your Add-On Store. Click to install and configure.
-
-#### Docker or Docker-Compose
 
 If you are not [running the add-on](https://www.home-assistant.io/common-tasks/os#installing-third-party-add-ons), you must write the **rtlamr2mqtt.yaml** configuration file.
 
@@ -292,13 +213,6 @@ If you have multiple RTL-SDRs and wish to start the LISTEN ALL METERS mode on a 
 docker run --rm -ti -e LISTEN_ONLY=yes -e RTL_MSGTYPE="all" -e RTL_TCP_ARGS="-d 777" --device=/dev/bus/usb:/dev/bus/usb allangood/rtlamr2mqtt
 ```
 
-**Important note**
-
-If you are running the Add-On, then a MQTT topic will be created with the output and you will be able to check the output using Home Assistant.
-The topic is: <base_topic>/debug
-
-Open the MQTT setting and listen in the debug topic:
-[![Open your Home Assistant instance and show your MQTT configuration panel.](https://my.home-assistant.io/badges/config_mqtt.svg)](https://my.home-assistant.io/redirect/config_mqtt/)
 
 #### LISTEN ONLY MODE with remote RTL_TCP:
 
@@ -315,9 +229,8 @@ A big thank you to all kind [contributions](https://github.com/allangood/rtlamr2
 
 ### Credits to:
 allangood
+
 RTLAMR - https://github.com/bemasher/rtlamr
 
 RTL_TCP - https://osmocom.org/projects/rtl-sdr/wiki/Rtl-sdr
 
-Icon by:
-[Sound icons created by Plastic Donut - Flaticon]("https://www.flaticon.com/free-icons/sound")
