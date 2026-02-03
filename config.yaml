@@ -8,7 +8,7 @@ startup: application
 boot: auto
 map:
   - config:rw
-url: https://github.com/allangood/rtlamr2mqtt
+url: https://github.com/surbin004/rtlamr2mqtt-2.3.4
 uart: true
 udev: true
 usb: true
