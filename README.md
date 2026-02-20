@@ -4,7 +4,6 @@
 
 RTLAMR2MQTT is a small Python program to read your utility meter such as water, gas and energy using an inexpensive USB RTL-SDR device and send these readings to a MQTT broker to be integrated with Home Assistant or NodeRed.
 
-The project is currently under heavy development!
 
 ### Current features
 
