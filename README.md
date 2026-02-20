@@ -223,9 +223,7 @@ You will need to define 2 enviroment variables:
 
 If you are using the Add-on, then these parameters will be read from the configuration file.
 
-### Thanks to
 
-A big thank you to all kind [contributions](https://github.com/allangood/rtlamr2mqtt/graphs/contributors)!
 
 ### Credits to:
 allangood
