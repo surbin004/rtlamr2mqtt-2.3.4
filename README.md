@@ -226,7 +226,7 @@ If you are using the Add-on, then these parameters will be read from the configu
 
 
 ### Credits to:
-allangood
+allangood - https://github.com/allangood
 
 RTLAMR - https://github.com/bemasher/rtlamr
 
