@@ -321,6 +321,15 @@ def send_ha_autodiscovery(meter, mqtt_config):
     """
     log_message('Sending MQTT autodiscovery payload to Home Assistant...')
     discover_topic = '{}/sensor/rtlamr/{}/config'.format(mqtt_config['ha_autodiscovery_topic'], meter['name'])
+    
+    # Define the device dictionary separately for clarity
+    device_info = {
+        'identifiers': ["rtlamr_{}".format(meter['id'])],
+        'name': meter['name'].replace('_', ' ').title(),
+        'model': str(meter.get('protocol', 'RTLAMR Meter')).upper(),
+        'manufacturer': 'rtlamr2mqtt'
+    }
+
     discover_payload = {
         'name': meter['name'],
         'unique_id': str(meter['id']),
@@ -331,15 +340,9 @@ def send_ha_autodiscovery(meter, mqtt_config):
         'state_class': meter.get('state_class', 'total_increasing'),
         'state_topic': meter['state_topic'],
         'json_attributes_topic': meter['attribute_topic'],
-        # --- ADD THIS DEVICE SECTION ---
-        'device': {
-            'identifiers': [f"rtlamr_{meter['id']}"],
-            'name': meter['name'].replace('_', ' ').title(),
-            'model': meter.get('protocol', 'RTLAMR Meter').upper(),
-            'manufacturer': 'rtlamr2mqtt'
-        }
-        # -------------------------------
+        'device': device_info  # Include the device dictionary here
     }
+
     if meter['device_class'] is not None:
         discover_payload['device_class'] = meter['device_class']
     
