@@ -330,10 +330,19 @@ def send_ha_autodiscovery(meter, mqtt_config):
         'force_update': True,
         'state_class': meter.get('state_class', 'total_increasing'),
         'state_topic': meter['state_topic'],
-        'json_attributes_topic': meter['attribute_topic']
+        'json_attributes_topic': meter['attribute_topic'],
+        # --- ADD THIS DEVICE SECTION ---
+        'device': {
+            'identifiers': [f"rtlamr_{meter['id']}"],
+            'name': meter['name'].replace('_', ' ').title(),
+            'model': meter.get('protocol', 'RTLAMR Meter').upper(),
+            'manufacturer': 'rtlamr2mqtt'
+        }
+        # -------------------------------
     }
     if meter['device_class'] is not None:
         discover_payload['device_class'] = meter['device_class']
+    
     mqtt_sender.publish(topic=discover_topic, payload=dumps(discover_payload), qos=1, retain=True)
 
 def tickle_rtl_tcp(remote_server):
@@ -369,6 +378,8 @@ signal.signal(signal.SIGINT, shutdown)
 
 # LISTEN Mode
 def listen_mode():
+    # ADD THESE THREE GLOBALS HERE:
+    global external_rtl_tcp, rtltcp, rtlamr
     log_message('Starting in LISTEN ONLY Mode...')
     msgtype = os.environ.get('RTL_MSGTYPE', 'all')
     rtlamr_cmd = ['/usr/bin/rtlamr', '-msgtype={}'.format(msgtype), '-format=json']
