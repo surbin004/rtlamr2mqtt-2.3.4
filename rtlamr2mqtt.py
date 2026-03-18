@@ -28,7 +28,15 @@ from paho.mqtt import MQTTException
 running_as_addon = False
 if os.getenv("SUPERVISOR_TOKEN") is not None:
     running_as_addon = True
-
+# --- ADD THESE AROUND LINE 30 ---
+rtltcp = None
+rtlamr = None
+external_rtl_tcp = False
+running_in_listen_only_mode = False
+mqtt_sender = None
+availability_topic = 'rtlamr/status'
+# --------------------------------
+    
 # From:
 # https://stackoverflow.com/questions/14626395/how-to-properly-convert-a-c-ioctl-call-to-a-python-fcntl-ioctl-call
 def reset_usb_device(usbdev):
@@ -144,38 +152,46 @@ class MqttSender:
 
 # uses signal to shutdown and hard kill opened processes and self
 def shutdown(signum, frame):
-    # When signum and frame == 0, it is me calling the function
+    # Declare globals so the function can access them
+    global rtltcp, rtlamr, external_rtl_tcp, mqtt_sender, availability_topic, running_in_listen_only_mode
+
     if signum == frame == 0:
         log_message('Kill process called.')
     else:
         log_message('Shutdown detected, killing process.')
-    if not external_rtl_tcp and rtltcp.returncode is None:
-        log_message('Killing RTL_TCP...')
-        rtltcp.terminate()
-        try:
-            rtltcp.wait(timeout=5)
-            log_message('Killed in the first attempt.')
-        except subprocess.TimeoutExpired:
-            rtltcp.kill()
-            rtltcp.wait()
-            log_message('Killed.')
-    if rtlamr.returncode is None:
-        log_message('Killing RTLAMR...')
-        rtlamr.terminate()
-        try:
-            rtlamr.wait(timeout=5)
-            log_message('Killed in the first attempt.')
-        except subprocess.TimeoutExpired:
-            rtlamr.kill()
-            rtlamr.wait()
-            log_message('Killed.')
+
+    # Safely kill RTL_TCP if it was started locally
+    if not external_rtl_tcp and rtltcp is not None:
+        if rtltcp.poll() is None:  # Check if process is still running
+            log_message('Killing RTL_TCP...')
+            rtltcp.terminate()
+            try:
+                rtltcp.wait(timeout=5)
+                log_message('RTL_TCP killed in the first attempt.')
+            except subprocess.TimeoutExpired:
+                rtltcp.kill()
+                rtltcp.wait()
+                log_message('RTL_TCP hard killed.')
+
+    # Safely kill RTLAMR
+    if rtlamr is not None:
+        if rtlamr.poll() is None:  # Check if process is still running
+            log_message('Killing RTLAMR...')
+            rtlamr.terminate()
+            try:
+                rtlamr.wait(timeout=5)
+                log_message('RTLAMR killed in the first attempt.')
+            except subprocess.TimeoutExpired:
+                rtlamr.kill()
+                rtlamr.wait()
+                log_message('RTLAMR hard killed.')
+
+    # Handle MQTT offline status and exit
     if signum != 0 and frame != 0:
         log_message('Graceful shutdown.')
-        # Are we running in LISTEN_ONLY mode?
         if not running_in_listen_only_mode:
             if mqtt_sender:
                 mqtt_sender.publish(topic=availability_topic, payload='offline', retain=True)
-        # Graceful termination
         sys.exit(0)
 
 def load_yaml_config(config_path):
@@ -233,8 +249,8 @@ def load_config(argv):
             'base_topic': 'rtlamr'
         },
         'custom_parameters': {
-            'rtltcp': "-s 2048000",
-            'rtlamr': "-unique=true",
+            'rtltcp': "-s 2048000 -g 40",  # Forced stable rate and higher gain
+            'rtlamr': "-unique=true -centerfreq=912600000", # Centered for SCM
         },
     }
     # Attempts to load config from json or yaml file
@@ -402,6 +418,8 @@ def listen_mode():
 
 # Main
 if __name__ == "__main__":
+    # ADD THESE GLOBALS HERE TO FIX THE NAMEERROR
+    global rtltcp, rtlamr, external_rtl_tcp, mqtt_sender, running_in_listen_only_
 
     running_in_listen_only_mode = False
     if str(os.environ.get('LISTEN_ONLY')).lower() in ['yes', 'true']:
