@@ -431,11 +431,18 @@ def listen_mode():
                 mqtt_sender.publish(topic=debug_topic, payload=dumps(json_output), retain=False)
 
 # Main
+# Main
 if __name__ == "__main__":
-    # ADD THESE GLOBALS HERE TO FIX THE NAMEERROR
-    global rtltcp, rtlamr, external_rtl_tcp, mqtt_sender, running_in_listen_only_
 
+    # --- BLOCK 2 START: Initialize these first ---
+    rtltcp = None
+    rtlamr = None
+    external_rtl_tcp = False
+    mqtt_sender = None
     running_in_listen_only_mode = False
+    availability_topic = 'rtlamr/status'
+    # --- BLOCK 2 END ---
+
     if str(os.environ.get('LISTEN_ONLY')).lower() in ['yes', 'true']:
         running_in_listen_only_mode = True
 
