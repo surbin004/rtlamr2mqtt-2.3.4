@@ -540,23 +540,22 @@ if __name__ == "__main__":
 
         mqtt_sender.publish(topic=availability_topic, payload='online', retain=True)
 
-        # Is this the first time are we executing this loop? Or is rtltcp running?
-        if not external_rtl_tcp and ('rtltcp' not in locals() or rtltcp.poll() is not None):
+        # FIX: Check if rtltcp is None OR if the process has died
+        if not external_rtl_tcp and (rtltcp is None or rtltcp.poll() is not None):
             log_message('Trying to start RTL_TCP: {}'.format(' '.join(rtltcp_cmd)))
             # start the rtl_tcp program
             rtltcp = subprocess.Popen(rtltcp_cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, close_fds=True, universal_newlines=True)
             log_message('RTL_TCP started with PID {}'.format(rtltcp.pid))
             # Wait until it is ready to receive connections
             try:
-                outs, errs = rtltcp.communicate(timeout=5)
-            except subprocess.TimeoutExpired:
-                outs = None
+                # We use a small sleep here instead of communicate() to avoid hanging the script
+                sleep(2) 
+            except Exception:
+                pass
             log_message('RTL_TCP is ready to receive connections!')
-            if outs is not None:
-                log_message(outs)
 
-        # Is this the first time are we executing this loop? Or is rtlamr running?
-        if 'rtlamr' not in locals() or rtlamr.poll() is not None:
+        # FIX: Check if rtlamr is None OR if the process has died
+        if rtlamr is None or rtlamr.poll() is not None:
             if config['general']['tickle_rtl_tcp']:
                 tickle_rtl_tcp(config['general']['rtltcp_server'])
             log_message('Trying to start RTLAMR: {}'.format(' '.join(rtlamr_cmd)))
@@ -567,25 +566,22 @@ if __name__ == "__main__":
         # This is a counter to count the number of duplicate error messages
         error_count = 0
         for amrline in rtlamr.stdout:
-            if not external_rtl_tcp and ('rtltcp' not in locals() or rtltcp.poll() is not None):
-                try:
-                    outs, errs = rtltcp.communicate(timeout=5)
-                except subprocess.TimeoutExpired:
-                    outs = None
-                if outs is not None:
-                    log_message('RTL_TCP: {}'.format(outs))
+            # FIX: Internal loop check for rtltcp health
+            if not external_rtl_tcp and (rtltcp is None or rtltcp.poll() is not None):
+                log_message('RTL_TCP died unexpectedly!')
+                break # Exit the for loop to restart rtltcp in the main while loop
+            
             if is_an_error_message(amrline):
                 if error_count < 1:
                     log_message('Error reading samples from RTL_TCP.')
                 error_count += 1
-            # Error messages are flooding the Docker logs when an error happens
-            # Try to not show everything but the necessary for debuging
+            
             if config['general']['verbosity'] == 'debug' and not is_an_error_message(amrline):
                 log_message(amrline.strip('\n'))
 
             # Check if the output line is a valid JSON output
             json_output = None
-            if amrline[0] == '{':
+            if amrline and amrline[0] == '{':
                 try:
                     json_output = loads(amrline)
                 except JSONDecodeError:
